@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title><%= list.name %> - Details</title>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../public/main.css" />
+</head>
+<body>
+  <main class="layout">
+    <aside class="sidebar">
+      <h2>Your Lists</h2>
+      <ul class="list_menu">
+        <% savedLists.forEach(list => { %>
+          <li><a href="/api/lists/<%= list.name %>"><%= list.name %></a></li>
+        <% }); %>
+      </ul>
+      <button class="create_list_btn_sb" id="openModalBtn">+ Create New List</button>
+    </aside>
+
+    <section class="content_area">
+      <h1 class="heading"><%= list.name %></h1>
+
+      <form class="delete_list" action="/api/lists/<%= list.name %>?_method=DELETE" method="POST" onsubmit="return confirm('Are you sure you want to delete this list?');">
+        <button class="button" type="submit">Delete the list</button>
+      </form>
+
+      <ul class="movie__list">
+        <% savedMovies.forEach(movie => { %>
+          <li>
+            <div class="movie" data-id="<%= movie.id %>">
+              <div class="movie__cover-inner">
+                <img src="<%= movie.posterUrl || '' %>" alt="<%= movie.title %>" class="movie__cover" />
+              </div>
+              <div class="movie__info">
+                <div class="movie__title"><%= movie.title %></div>
+                <% if (movie.genres && movie.genres.length > 0) { %>
+                  <div class="movie__category">Genres: <%= movie.genres.join(', ') %></div>
+                <% } %>
+                <% if (movie.rating) { %>
+                  <div class="movie__average"><%= movie.rating %></div>
+                <% } %>
+              </div>
+
+              <div class="movie__actions">
+                <% savedLists.forEach(list => { %>
+                  <form action="/api/lists/<%= list.name %>/add-movie" method="POST">
+                    <input type="hidden" name="id" value="<%= movie.id %>">
+                    <input type="hidden" name="title" value="<%= movie.title %>">
+                    <button class="dropdown_item" type="submit"><%= list.name %></button>
+                  </form>
+                <% }) %>
+                <button class="create_list_btn_dp_dwn">+ Create New List</button>
+
+                <form action="/api/lists/<%= list.name %>/delete-movie/<%= movie.id %>?_method=DELETE" method="POST"
+                      onsubmit="return confirm('Are you sure you want to delete this movie?');">
+                  <button class="button" type="submit">Delete</button>
+                </form>
+              </div>
+            </div>
+          </li>
+        <% }); %>
+      </ul>
+    </section>
+  </main>
+
+  <!-- Modal Overlay -->
+  <div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal-window">
+      <h2>Create New List</h2>
+      <form action="/api/lists/add" method="POST">
+        <input type="text" name="name" placeholder="List name" required />
+        <div style="margin-top: 1rem;">
+          <button class="button" type="submit">Create</button>
+          <button type="button" class="button close-modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById('modalOverlay');
+      const openBtns = document.querySelectorAll('.create_list_btn_dp_dwn');
+      const closeBtns = document.querySelectorAll('.close-modal');
+      const openSidebarBtn = document.getElementById('openModalBtn');
+
+      openBtns.forEach(btn => {
+        btn.addEventListener('click', () => modal.classList.remove('hidden'));
+      });
+
+      openSidebarBtn.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+      });
+
+      closeBtns.forEach(btn => {
+        btn.addEventListener('click', () => modal.classList.add('hidden'));
+      });
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
+      });
+    });
+  </script>
+</body>
+</html>

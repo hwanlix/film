@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Popular Movies</title>
+  <link rel="stylesheet" href="../public/main.css" />
 </head>
 <body>
   <h1>Popular Movies</h1>
@@ -57,9 +58,6 @@
           ${movie.rating ? `<div class="movie__average">${movie.rating}</div>` : ''}
         </div>
       `;
-
-      // You can add event listeners here for modal open if needed
-
       return div;
     }
 
@@ -74,8 +72,8 @@
         if (data.films && data.films.length > 0) {
           data.films.forEach(movie => {
             const el = createMovieElement({
-              id: movie.filmId,
-              title: movie.nameRu,
+              id: movie.id,
+              title: movie.title,
               posterUrl: movie.posterUrlPreview,
               genres: movie.genres ? movie.genres.map(g => g.genre) : [],
               rating: movie.rating,

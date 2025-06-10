@@ -2,8 +2,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Your Lists</title>
-    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/main.css" />
+    <link rel="stylesheet" href="../public/main.css" />
   </head>
   <body>
     <main>
@@ -25,7 +24,7 @@
         <ul class="lists_list">
           <% savedLists.forEach(list => { %>
             <li class="list_item">
-              <img src="/images/dark Academia.jpeg" alt="Movies List Cover" class="movie_list_image" />
+              <img alt="Movies List Cover" class="movie_list_image" />
               <p>
                 <a class="list_name" href="/api/lists/<%= list.name %>"><%= list.name %></a>
               </p>

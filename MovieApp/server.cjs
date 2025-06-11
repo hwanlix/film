@@ -1,22 +1,17 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-//import movieRoutes from './routes/movieRoutes.js';
-//import listRoutes from './routes/listRoutes.js';
-import db from "./database.js";
-import path from 'path';
-import { fileURLToPath } from 'url';
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const db = require('./database.js');
+const path = require('path');
 
 dotenv.config();
 
 const { mongoConnect } = db;
 
 const app = express();
-
 const PORT = process.env.PORT || 5000;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.resolve();
 
 const apiRoutes = require('./routes/api');
 app.use('/api', apiRoutes);
@@ -24,23 +19,24 @@ app.use('/api', apiRoutes);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 mongoConnect(async () => {
-  const { ensureDefaultLists } = await import('./controllers/listController.js');
+  const { ensureDefaultLists } = require('./controllers/listController.js');
   await ensureDefaultLists();
 
-  const movieRoutes = (await import('./routes/movieRoutes.js')).default;
-  const listRoutes = (await import('./routes/listRoutes.js')).default;
+  const movieRoutes = require('./routes/movieRoutes.js');
+  const listRoutes = require('./routes/listRoutes.js');
 
   app.use('/api/movies', movieRoutes);
   app.use('/api/lists', listRoutes);
 
-  app.listen(PORT);
-
   app.get('/add', (req, res) => {
-  res.render('add'); 
-});
+    res.render('add');
+  });
 
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
 });

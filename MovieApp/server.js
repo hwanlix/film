@@ -38,4 +38,9 @@ mongoConnect(async () => {
   app.use('/api/lists', listRoutes);
 
   app.listen(PORT);
+
+  app.get('/add', (req, res) => {
+  res.render('add'); 
+});
+
 });

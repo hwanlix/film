@@ -18,6 +18,9 @@ const PORT = process.env.PORT || 5000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const apiRoutes = require('./routes/api');
+app.use('/api', apiRoutes);
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.json());

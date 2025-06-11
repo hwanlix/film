@@ -3,15 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <title>Popular Movies</title>
-  <link rel="stylesheet" href="../public/main.css" />
+  <link rel="stylesheet" href="/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1>Popular Movies</h1>
+  <header>
+    <h1>🎬 Popular Movies</h1>
+  </header>
 
-  <form id="searchForm">
-    <input type="text" id="searchInput" placeholder="Search movies..." />
-    <button type="submit">Search</button>
-  </form>
+  <div class="search-bar">
+    <form id="searchForm">
+      <input type="text" id="searchInput" placeholder="Search movies..." />
+      <button type="submit">Search</button>
+    </form>
+  </div>
 
   <div class="movies" id="moviesContainer">
     <% if (movies.length === 0) { %>
@@ -20,7 +25,7 @@
       <% movies.forEach(movie => { %>
         <div class="movie" data-id="<%= movie.id %>">
           <div class="movie__cover-inner">
-            <img src="<%= movie.posterUrl || '' %>" alt="<%= movie.title %>" class="movie__cover" />
+            <img src="<%= movie.posterUrl || 'https://via.placeholder.com/200x300?text=No+Image' %>" alt="<%= movie.title %>" class="movie__cover" />
           </div>
           <div class="movie__info">
             <div class="movie__title"><%= movie.title %></div>
@@ -30,7 +35,7 @@
               <% } %>
             </div>
             <% if (movie.rating) { %>
-              <div class="movie__average"><%= movie.rating %></div>
+              <div class="movie__average">⭐ <%= movie.rating %></div>
             <% } %>
           </div>
         </div>
@@ -50,12 +55,12 @@
 
       div.innerHTML = `
         <div class="movie__cover-inner">
-          <img src="${movie.posterUrl || ''}" alt="${movie.title}" class="movie__cover" />
+          <img src="${movie.posterUrl || 'https://via.placeholder.com/200x300?text=No+Image'}" alt="${movie.title}" class="movie__cover" />
         </div>
         <div class="movie__info">
           <div class="movie__title">${movie.title}</div>
           <div class="movie__category">${movie.genres && movie.genres.length ? 'Genres: ' + movie.genres.join(', ') : ''}</div>
-          ${movie.rating ? `<div class="movie__average">${movie.rating}</div>` : ''}
+          ${movie.rating ? `<div class="movie__average">⭐ ${movie.rating}</div>` : ''}
         </div>
       `;
       return div;
@@ -69,13 +74,13 @@
 
         moviesContainer.innerHTML = '';
 
-        if (data.films && data.films.length > 0) {
-          data.films.forEach(movie => {
+        if (data.length > 0) {
+          data.forEach(movie => {
             const el = createMovieElement({
-              id: movie.id,
+              id: movie._id || movie.id,
               title: movie.title,
-              posterUrl: movie.posterUrlPreview,
-              genres: movie.genres ? movie.genres.map(g => g.genre) : [],
+              posterUrl: movie.posterUrl || movie.posterUrlPreview || '',
+              genres: movie.genres ? movie.genres.map(g => g.genre || g) : [],
               rating: movie.rating,
             });
             moviesContainer.appendChild(el);
@@ -93,11 +98,9 @@
       e.preventDefault();
       const query = searchInput.value.trim();
       if (!query) return;
-
-      fetchMovies(`/api/movies/search?query=${encodeURIComponent(query)}`);
+      fetchMovies(`/api/movies/search?q=${encodeURIComponent(query)}`);
       searchInput.value = '';
     });
-
   </script>
 </body>
 </html>

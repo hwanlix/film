@@ -1,0 +1,33 @@
+<!-- views/login.ejs -->
+<form id="loginForm">
+  <input type="text" name="username" placeholder="Username" required />
+  <input type="password" name="password" placeholder="Password" required />
+  <button type="submit">Login</button>
+</form>
+
+<script>
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const form = e.target;
+    const username = form.username.value;
+    const password = form.password.value;
+
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await response.json();
+
+    if (data.token) {
+      // ✅ STORE JWT in browser
+      localStorage.setItem('token', data.token);
+      alert('Logged in!');
+      window.location.href = '/'; // or wherever you want to go
+    } else {
+      alert(data.message || 'Login failed');
+    }
+  });
+</script>

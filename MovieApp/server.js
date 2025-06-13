@@ -30,7 +30,9 @@ mongoConnect(async () => {
 
   const movieRoutes = (await import('./routes/movieRoutes.js')).default;
   const listRoutes = (await import('./routes/listRoutes.js')).default;
+  const authRoutes = (await import('./routes/authRoutes.js')).default;
 
+  app.use('/api/auth', authRoutes);
   app.use('/api/movies', movieRoutes);
   app.use('/api/lists', listRoutes);
 

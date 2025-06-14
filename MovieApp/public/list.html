@@ -7,10 +7,12 @@
 </head>
 <body>
   <h1 id="listName">Loading...</h1>
+    
+  <button id="deleteListBtn" class="button">Delete this list</button>
+
   <ul id="movieList"></ul>
 
   <script>
-    // Get list name from query parameter ?name=
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
@@ -19,11 +21,12 @@
     const listName = getQueryParam('name');
     const listNameEl = document.getElementById('listName');
     const movieListEl = document.getElementById('movieList');
+    const deleteButton = document.getElementById('deleteListBtn');
 
     if (!listName) {
       listNameEl.textContent = 'No list specified.';
+      deleteButton.style.display = 'none';
     } else {
-      // Fetch list data from your API
       fetch(`/api/lists/${encodeURIComponent(listName)}`, { credentials: 'include' })
         .then(res => {
           if (!res.ok) throw new Error('List not found');
@@ -48,6 +51,25 @@
           listNameEl.textContent = 'Error loading list.';
           console.error(err);
         });
+
+
+        deleteButton.addEventListener('click', () => {
+        if (!confirm('Are you sure you want to delete this list?')) return;
+
+        fetch(`/api/lists/${encodeURIComponent(listName)}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        })
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to delete the list');
+          window.location.href = '/lists.html';
+        })
+        .catch(err => {
+          alert('Could not delete the list.');
+          console.error(err);
+        });
+      });
+
     }
   </script>
 </body>

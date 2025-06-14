@@ -1,4 +1,10 @@
-<!-- views/login.ejs -->
+<% if (error) { %>
+  <p style="color:red;"><%= error %></p>
+<% } %>
+<% if (success) { %>
+  <p style="color:green;"><%= success %></p>
+<% } %>
+
 <form id="loginForm">
   <input type="text" name="username" placeholder="Username" required />
   <input type="password" name="password" placeholder="Password" required />
@@ -16,16 +22,15 @@
     const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ username, password }),
+      credentials: 'include'  // IMPORTANT: allow cookies to be sent/received
     });
 
     const data = await response.json();
 
-    if (data.token) {
-      // ✅ STORE JWT in browser
-      localStorage.setItem('token', data.token);
+    if (response.ok) {
       alert('Logged in!');
-      window.location.href = '/'; // or wherever you want to go
+      window.location.href = '/api/lists/view';  // redirect to your lists page, cookie will be sent automatically
     } else {
       alert(data.message || 'Login failed');
     }

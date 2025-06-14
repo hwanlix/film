@@ -1,9 +1,12 @@
 import { Router } from 'express';
 const router = Router();
-import { getListsView, createNewList, getListView, deleteList, addMovieToUserList, deleteMovieFromUserList} from '../controllers/listController.js';
+import { getListsView, createNewList, getListView, deleteList, addMovieToUserList, deleteMovieFromUserList, getJSONlists } from '../controllers/listController.js';
+import { authenticateToken } from '../middleware/authMiddleware.js';
 
+router.use(authenticateToken);
 
-router.get('/', getListsView);
+router.get('/', getJSONlists);
+router.get('/view', getListsView);
 router.post("/add", createNewList);
 router.get("/:name", getListView);
 router.delete("/:name", deleteList);

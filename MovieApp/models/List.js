@@ -1,29 +1,41 @@
+import { ObjectId } from 'mongodb';
 import db from '../database.js';
 const { getDatabase } = db;
 
 const COLLECTION_NAME = 'movies_lists';
 
 class List {
-  constructor(name) {
+  constructor(name, userId) {
+    if (!ObjectId.isValid(userId)) {
+      throw new Error('Invalid userId');
+    }
+
     this.name = name;
+    this.userId = new ObjectId(String(userId));
     this.movies = [];
   }
 
 
-  static async getAll() {
+  static async getAll(userId) {
     const db = getDatabase();
     try {
-      return await db.collection(COLLECTION_NAME).find({}).toArray();
+      if (!ObjectId.isValid(userId)) {
+        throw new Error('Invalid userId');
+      }
+      return await db.collection(COLLECTION_NAME).find({ userId: new ObjectId(String(userId))}).toArray();
     } catch (error) {
       console.error('Error while fetching all lists:', error);
       return [];
     }
   }
 
-  static async findByName(name) {
+  static async findByName(name, userId) {
     const db = getDatabase();
     try {
-      return await db.collection(COLLECTION_NAME).findOne({ name });
+      if (!ObjectId.isValid(userId)) {
+        throw new Error('Invalid userId');
+      }
+      return await db.collection(COLLECTION_NAME).findOne({ name, userId: new ObjectId(String(userId)) });
     } catch (error) {
       console.error('Error while finding list by name:', error);
       return null;
@@ -33,10 +45,13 @@ class List {
   static async add(list) {
     const db = getDatabase();
     try {
-      if (!list || !list.name) {
+      if (!ObjectId.isValid(list.userId)) {
+        throw new Error('Invalid userId');
+      }
+      if (!list || !list.name || !list.userId) {
         throw new Error('Invalid list object passed to add()');
       }
-      const exists = await this.findByName(list.name);
+      const exists = await this.findByName(list.name, list.userId);
       if (!exists) {
         await db.collection(COLLECTION_NAME).insertOne(list);
       }
@@ -45,10 +60,13 @@ class List {
     }
   }
 
-  static async deleteByName(name) {
+  static async deleteByName(name, userId) {
     const db = getDatabase();
     try {
-      await db.collection(COLLECTION_NAME).deleteOne({ name });
+      if (!ObjectId.isValid(userId)) {
+        throw new Error('Invalid userId');
+      }
+      await db.collection(COLLECTION_NAME).deleteOne({ name, userId: new ObjectId(String(userId)) });
     } catch (error) {
       console.error('Error while deleting list:', error);
     }
@@ -71,12 +89,15 @@ class List {
   }
 
 
-  static async addMovieToList(listName, movie) {
+  static async addMovieToList(listName, userId, movie) {
     const db = getDatabase();
     try {
+      if (!ObjectId.isValid(userId)) {
+        throw new Error('Invalid userId');
+      }
       // Only add if not already in the list
       await db.collection(COLLECTION_NAME).updateOne(
-        { name: listName, 'movies.id': { $ne: movie.id } },
+        { name: listName, userId: new ObjectId(String(userId)), 'movies.id': { $ne: movie.id } },
         { $push: { movies: movie } }
       );
     } catch (error) {
@@ -84,11 +105,14 @@ class List {
     }
   }
 
-  static async deleteMovieFromList(listName, movieId) {
+  static async deleteMovieFromList(listName, userId, movieId) {
     const db = getDatabase();
     try {
+      if (!ObjectId.isValid(userId)) {
+        throw new Error('Invalid userId');
+      }
       await db.collection(COLLECTION_NAME).updateOne(
-        { name: listName },
+        { name: listName, userId: new ObjectId(String(userId)) },
         { $pull: { movies: { id: movieId } } }
       );
     } catch (error) {
@@ -96,10 +120,13 @@ class List {
     }
   }
 
-  static async getMovies(listName) {
+  static async getMovies(listName, userId) {
     const db = getDatabase();
     try {
-      const list = await db.collection(COLLECTION_NAME).findOne({ name: listName });
+      if (!ObjectId.isValid(userId)) {
+        throw new Error('Invalid userId');
+      }
+      const list = await db.collection(COLLECTION_NAME).findOne({ name: listName, userId: new ObjectId(String(userId)) });
       return list?.movies || [];
     } catch (error) {
       console.error('Error while getting movies:', error);

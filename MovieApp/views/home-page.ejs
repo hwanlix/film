@@ -8,6 +8,8 @@
 <body>
   <h1>Popular Movies</h1>
 
+  <button onclick="handleLogout()">Logout</button>
+
   <form id="searchForm">
     <input type="text" id="searchInput" placeholder="Search movies..." />
     <button type="submit">Search</button>
@@ -97,6 +99,25 @@
       fetchMovies(`/api/movies/search?query=${encodeURIComponent(query)}`);
       searchInput.value = '';
     });
+
+    async function handleLogout() {
+      try {
+        localStorage.removeItem('token');
+
+        const res = await fetch('/api/auth/logout', {
+          method: 'POST',
+          credentials: 'include', // important if you're using cookies for auth
+        });
+
+        if (res.ok) {
+          window.location.href = '/api/auth/login';
+        } else {
+          alert('Logout failed');
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    }
 
   </script>
 </body>

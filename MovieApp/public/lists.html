@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Your Lists</title>
+  <link rel="stylesheet" href="/main.css" />
+</head>
+<body>
+  <main>
+    <h1 class="heading">Your lists</h1>
+
+    <button class="create_list_btn" id="openFormBtn">+ Create New List</button>
+
+    <form id="createListForm" aria-label="Create new list form">
+      <input type="text" name="name" placeholder="List name" required />
+      <button type="submit" class="button">Create</button>
+      <button type="button" class="button" id="cancelBtn">Cancel</button>
+      <p id="formError" style="color: red; display: none;"></p>
+    </form>
+
+    <ul class="lists_list" id="listsContainer"></ul>
+  </main>
+
+  <script>
+    const openFormBtn = document.getElementById('openFormBtn');
+    const createListForm = document.getElementById('createListForm');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const formError = document.getElementById('formError');
+    const listsContainer = document.getElementById('listsContainer');
+
+    openFormBtn.addEventListener('click', () => {
+      formError.style.display = 'none';
+      formError.textContent = '';
+      createListForm.name.value = '';
+      createListForm.style.display = 'block';
+      openFormBtn.style.display = 'none';  
+      createListForm.name.focus();
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      createListForm.style.display = 'none';
+      formError.style.display = 'none';
+      formError.textContent = '';
+      openFormBtn.style.display = 'inline-block'; 
+    });
+
+    async function fetchLists() {
+      try {
+        const res = await fetch('/api/lists/', { credentials: 'include' });
+        if (!res.ok) throw new Error('Failed to fetch lists');
+        const data = await res.json();
+        renderLists(data.savedLists);
+      } catch (err) {
+        listsContainer.innerHTML = `<li style="color:red;">Error loading lists</li>`;
+        console.error(err);
+      }
+    }
+
+    function renderLists(lists) {
+      if (!lists || lists.length === 0) {
+        listsContainer.innerHTML = '<li>No lists found.</li>';
+        return;
+      }
+      listsContainer.innerHTML = '';
+      lists.forEach(list => {
+        const li = document.createElement('li');
+        li.className = 'list_item';
+        const p = document.createElement('p');
+        const a = document.createElement('a');
+        a.href = `/list.html?name=${encodeURIComponent(list.name)}`;
+        a.textContent = list.name;
+        a.className = 'list_name';
+        p.appendChild(a);
+        li.appendChild(p);
+        listsContainer.appendChild(li);
+      });
+    }
+
+    createListForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      formError.style.display = 'none';
+      formError.textContent = '';
+
+      const name = createListForm.name.value.trim();
+      if (!name) {
+        formError.textContent = 'List name is required';
+        formError.style.display = 'block';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/lists/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ name })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          createListForm.style.display = 'none';
+          openFormBtn.style.display = 'inline-block';
+          fetchLists();
+        } else {
+          formError.textContent = data.error || 'Failed to create list';
+          formError.style.display = 'block';
+        }
+      } catch (err) {
+        formError.textContent = 'Server error';
+        formError.style.display = 'block';
+      }
+    });
+
+    fetchLists();
+  </script>
+</body>
+</html>

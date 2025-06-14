@@ -48,7 +48,7 @@ export async function createNewList(req, res) {
 }
 
 
-export async function getListView(request, response) {
+export async function getListView(req, res) {
   try {
     const userId = req.user.userId;
     const name = req.params.name;

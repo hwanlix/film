@@ -48,7 +48,6 @@ export async function getMergedMovieDetails(req, res) {
   try {
     const { tmdbId } = req.params;
 
-    // Step 1: Get TMDb details (to get imdb_id)
     const tmdbDetails = await fetchMovieDetailsFromTMDb(tmdbId);
     const imdbId = tmdbDetails.imdb_id;
 
@@ -56,10 +55,8 @@ export async function getMergedMovieDetails(req, res) {
       return res.status(404).json({ error: 'IMDb ID not found for this movie' });
     }
 
-    // Step 2: Get OMDb details by imdbId
     const omdbDetails = await fetchMovieDetailsFromOMDb(imdbId);
 
-    // Step 3: Merge data (example: combine TMDb info with OMDb Ratings and Plot)
     const mergedDetails = {
       id: tmdbDetails.id,
       title: tmdbDetails.title,
@@ -69,9 +66,9 @@ export async function getMergedMovieDetails(req, res) {
       overview: tmdbDetails.overview,
       releaseDate: tmdbDetails.release_date,
 
-      // Added from OMDb:
+      
       plot: omdbDetails.Plot,
-      ratings: omdbDetails.Ratings, // e.g., Rotten Tomatoes, Metacritic ratings
+      ratings: omdbDetails.Ratings, 
       awards: omdbDetails.Awards,
       runtime: omdbDetails.Runtime,
       director: omdbDetails.Director,

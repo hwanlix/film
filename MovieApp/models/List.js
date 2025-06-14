@@ -95,7 +95,7 @@ class List {
       if (!ObjectId.isValid(userId)) {
         throw new Error('Invalid userId');
       }
-      // Only add if not already in the list
+
       await db.collection(COLLECTION_NAME).updateOne(
         { name: listName, userId: new ObjectId(String(userId)), 'movies.id': { $ne: movie.id } },
         { $push: { movies: movie } }

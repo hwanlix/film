@@ -1,0 +1,183 @@
+openapi: 3.0.0
+info:
+  title: Movie App API
+  version: 1.0.0
+  description: API for managing users, movies, and custom movie lists.
+
+paths:
+  /login:
+    get:
+      summary: Show login form
+      responses:
+        200:
+          description: HTML login page
+    post:
+      summary: Log in a user
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: User logged in successfully
+        401:
+          description: Invalid credentials
+
+  /logout:
+    post:
+      summary: Log out the current user
+      responses:
+        200:
+          description: Logged out successfully
+
+  /register:
+    get:
+      summary: Show registration form
+      responses:
+        200:
+          description: HTML registration page
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: Registration successful
+        400:
+          description: User already exists
+
+  /:
+    get:
+      summary: Show user’s saved lists
+      responses:
+        200:
+          description: List of user’s saved lists
+
+  /add:
+    post:
+      summary: Create a new custom list
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        201:
+          description: List created
+
+  /{name}:
+    get:
+      summary: View a specific list
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: List details
+    delete:
+      summary: Delete a specific list
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: List deleted
+
+  /{name}/add-movie:
+    post:
+      summary: Add a movie to a list
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                movieId:
+                  type: integer
+      responses:
+        200:
+          description: Movie added
+
+  /{name}/delete-movie/{id}:
+    delete:
+      summary: Delete a movie from a list
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Movie removed
+
+  /popular:
+    get:
+      summary: Get popular movies from TMDb
+      responses:
+        200:
+          description: List of popular movies
+
+  /search:
+    get:
+      summary: Search for movies by query
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Search results
+
+  /{tmdbId}/details:
+    get:
+      summary: Get movie details from TMDb and OMDb
+      parameters:
+        - in: path
+          name: tmdbId
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Combined movie details

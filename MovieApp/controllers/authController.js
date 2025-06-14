@@ -56,3 +56,12 @@ export async function login(req, res) {
     res.status(500).json({ message: 'Server error' });
   }
 }
+
+export function logout(req, res) {
+  res.clearCookie('token', {
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+  });
+  res.json({ message: 'Logged out successfully' });
+}

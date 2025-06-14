@@ -56,10 +56,8 @@ export async function getListView(req, res) {
     if (!list) return res.status(404).json({ error: 'List not found' });
 
     await ensureDefaultLists(userId);
-    const savedLists = await List.getAll(userId);
-    const savedMovies = await List.getMovies(name, userId) || [];
 
-    res.status(200).json({ list, savedLists, savedMovies });
+    res.status(200).json({ list });
   } catch (err) {
     console.error('Error fetching list view:', err);
     res.status(500).json({ error: 'Failed to retrieve list view' });

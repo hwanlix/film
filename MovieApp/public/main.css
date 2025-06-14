@@ -1,0 +1,24 @@
+#createListForm {
+    display: none;
+    margin-top: 1rem;
+}
+
+.inline-create-form {
+    margin-top: 1rem;
+    display: none;
+}
+
+.inline-create-form input[type="text"] {
+    padding: 0.3rem;
+    width: 150px;
+}
+
+.inline-create-form button {
+    margin-left: 0.5rem;
+}
+
+.form-error {
+    color: red;
+    margin-top: 0.5rem;
+    display: none;
+}

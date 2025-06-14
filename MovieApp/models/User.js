@@ -23,7 +23,7 @@ class User {
 
   static async findById(id) {
     const db = getDatabase();
-    return await db.collection(COLLECTION_NAME).findOne({ _id: new ObjectId(id) });
+    return await db.collection(COLLECTION_NAME).findOne({ _id: ObjectId(String(id)) });
   }
 }
 

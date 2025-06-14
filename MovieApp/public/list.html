@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>List Details</title>
+  <link rel="stylesheet" href="/main.css" />
+</head>
+<body>
+  <h1 id="listName">Loading...</h1>
+  <ul id="movieList"></ul>
+
+  <script>
+    // Get list name from query parameter ?name=
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    const listName = getQueryParam('name');
+    const listNameEl = document.getElementById('listName');
+    const movieListEl = document.getElementById('movieList');
+
+    if (!listName) {
+      listNameEl.textContent = 'No list specified.';
+    } else {
+      // Fetch list data from your API
+      fetch(`/api/lists/${encodeURIComponent(listName)}`, { credentials: 'include' })
+        .then(res => {
+          if (!res.ok) throw new Error('List not found');
+          return res.json();
+        })
+        .then(data => {
+          listNameEl.textContent = data.list.name;
+
+          if (!data.savedMovies || data.savedMovies.length === 0) {
+            movieListEl.innerHTML = '<li>No movies in this list.</li>';
+            return;
+          }
+
+          movieListEl.innerHTML = '';
+          data.savedMovies.forEach(movie => {
+            const li = document.createElement('li');
+            li.textContent = movie.title;
+            movieListEl.appendChild(li);
+          });
+        })
+        .catch(err => {
+          listNameEl.textContent = 'Error loading list.';
+          console.error(err);
+        });
+    }
+  </script>
+</body>
+</html>

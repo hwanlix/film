@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 
+const OMDB_API_KEY = '9308f81f';
 const TMDB_API_KEY = '933abbf58300a7122fefbf46dc1ea4f4';
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
@@ -19,6 +20,66 @@ async function fetchPopularMovies() {
   }));
 }
 
+
+async function fetchMovieDetailsFromTMDb(tmdbId) {
+  const response = await fetch(`${TMDB_BASE_URL}/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=en-US`);
+  if (!response.ok) throw new Error(`TMDb API error: ${response.statusText}`);
+  const data = await response.json();
+  return data;
+}
+
+
+async function fetchMovieDetailsFromOMDb(imdbId) {
+  const response = await fetch(`http://www.omdbapi.com/?i=${imdbId}&apikey=${OMDB_API_KEY}`);
+  if (!response.ok) throw new Error(`OMDb API error: ${response.statusText}`);
+  const data = await response.json();
+  if (data.Response === "False") throw new Error(`OMDb API error: ${data.Error}`);
+  return data;
+}
+
+export async function getMergedMovieDetails(req, res) {
+  try {
+    const { tmdbId } = req.params;
+
+    // Step 1: Get TMDb details (to get imdb_id)
+    const tmdbDetails = await fetchMovieDetailsFromTMDb(tmdbId);
+    const imdbId = tmdbDetails.imdb_id;
+
+    if (!imdbId) {
+      return res.status(404).json({ error: 'IMDb ID not found for this movie' });
+    }
+
+    // Step 2: Get OMDb details by imdbId
+    const omdbDetails = await fetchMovieDetailsFromOMDb(imdbId);
+
+    // Step 3: Merge data (example: combine TMDb info with OMDb Ratings and Plot)
+    const mergedDetails = {
+      id: tmdbDetails.id,
+      title: tmdbDetails.title,
+      posterUrl: tmdbDetails.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbDetails.poster_path}` : null,
+      genres: tmdbDetails.genres || [],
+      rating: tmdbDetails.vote_average ?? null,
+      overview: tmdbDetails.overview,
+      releaseDate: tmdbDetails.release_date,
+
+      // Added from OMDb:
+      plot: omdbDetails.Plot,
+      ratings: omdbDetails.Ratings, // e.g., Rotten Tomatoes, Metacritic ratings
+      awards: omdbDetails.Awards,
+      runtime: omdbDetails.Runtime,
+      director: omdbDetails.Director,
+      actors: omdbDetails.Actors,
+      language: omdbDetails.Language,
+      country: omdbDetails.Country,
+      boxOffice: omdbDetails.BoxOffice,
+    };
+
+    res.json(mergedDetails);
+  } catch (error) {
+    console.error('Error in getMergedMovieDetails:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+}
 
 //to delete
 export async function getPopularMovies(req, res) {

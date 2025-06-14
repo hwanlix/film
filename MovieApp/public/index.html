@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Popular Movies</title>
+  <link rel="stylesheet" href="/public/main.css">
+</head>
+<body>
+  <h1>Popular Movies</h1>
+
+  <button onclick="handleLogout()">Logout</button>
+
+  <form id="searchForm">
+    <input type="text" id="searchInput" placeholder="Search movies..." />
+    <button type="submit">Search</button>
+  </form>
+
+  <div id="moviesContainer">Loading movies...</div>
+
+  <script>
+    const container = document.getElementById('moviesContainer');
+
+    async function fetchMovies() {
+      try {
+        const res = await fetch('/api/movies/popular');
+        const data = await res.json();
+        container.innerHTML = '';
+
+        if (data.movies?.length) {
+          data.movies.forEach(movie => {
+            const el = document.createElement('div');
+            el.classList.add('movie');
+            el.innerHTML = `
+              <img src="${movie.posterUrl}" alt="${movie.title}" />
+              <h2>${movie.title}</h2>
+              <p>Genres: ${movie.genres.join(', ')}</p>
+              <p>Rating: ${movie.rating}</p>
+            `;
+            container.appendChild(el);
+          });
+        } else {
+          container.innerHTML = '<p>No movies found.</p>';
+        }
+      } catch (error) {
+        console.error('Failed to fetch movies:', error);
+        container.innerHTML = '<p>Error loading movies.</p>';
+      }
+    }
+
+    fetchMovies(); // on page load
+  </script>
+</body>
+</html>

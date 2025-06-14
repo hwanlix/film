@@ -6,18 +6,18 @@ import { ensureDefaultLists } from '../controllers/listController.js';
 const JWT_SECRET = process.env.JWT_SECRET || '5fe9034a9540e743188ac16ec2000b7a868fb8cb772701082ba39437676db4e5';
 
 export async function showLoginForm(req, res) {
-  res.render('loginPage', { error: null, success: null });
+  res.status(200).json({ message: 'Login form endpoint (for frontend use)' });
 }
 
 export async function showRegisterForm(req, res) {
-  res.render('registerPage', { error: null, success: null });
+  res.status(200).json({ message: 'Register form endpoint (for frontend use)' });
 }
 
 export async function register(req, res) {
   const { username, password } = req.body;
   try {
     const existing = await User.findByUsername(username);
-    if (existing) return res.status(400).render('registerPage', { error: 'User already exists', success: null });
+    if (existing) return res.status(400).json({ success: false, error: 'User already exists' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({ username, password: hashedPassword });
@@ -26,10 +26,10 @@ export async function register(req, res) {
     console.log(newUser._id);
     await ensureDefaultLists(newUser._id);
 
-    res.render('loginPage', { error: null, success: 'User registered successfully. Please log in.' });
+    return res.status(201).json({ success: true, message: 'User registered successfully. Please log in.' });
   } catch (err) {
     console.error('❌ Registration error:', err);
-    res.status(500).render('registerPage', { error: 'Server error', success: null });
+    res.status(500).json({ success: false, error: 'Server error' });
   }
 }
 
@@ -43,10 +43,10 @@ export async function login(req, res) {
 
     const token = jwt.sign({ userId: user._id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
     res.cookie('token', token, {
-      httpOnly: true,    // JS cannot access this cookie (security)
-      secure: process.env.NODE_ENV === 'production', // only on HTTPS in prod
+      httpOnly: true,    
+      secure: process.env.NODE_ENV === 'production', 
       sameSite: 'strict', 
-      maxAge: 24 * 60 * 60 * 1000 // 1 day expiration
+      maxAge: 24 * 60 * 60 * 1000 
     });
     res.json({ message: 'Logged in successfully' });
 

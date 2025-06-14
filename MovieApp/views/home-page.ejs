@@ -32,7 +32,7 @@
               <% } %>
             </div>
             <% if (movie.rating) { %>
-              <div class="movie__average"><%= movie.rating %></div>
+              <div class="movie__average"><%= movie.rating?.toFixed(1) %></div>
             <% } %>
           </div>
         </div>
@@ -77,7 +77,7 @@
               id: movie.id,
               title: movie.title,
               posterUrl: movie.posterUrlPreview,
-              genres: movie.genres ? movie.genres.map(g => g.genre) : [],
+              genres: movie.genres ? movie.genres : [],
               rating: movie.rating,
             });
             moviesContainer.appendChild(el);
@@ -106,7 +106,7 @@
 
         const res = await fetch('/api/auth/logout', {
           method: 'POST',
-          credentials: 'include', // important if you're using cookies for auth
+          credentials: 'include', 
         });
 
         if (res.ok) {

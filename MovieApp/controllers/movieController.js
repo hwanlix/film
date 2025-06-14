@@ -4,6 +4,30 @@ const OMDB_API_KEY = '9308f81f';
 const TMDB_API_KEY = '933abbf58300a7122fefbf46dc1ea4f4';
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
+
+const genreMap = {
+  28: 'Action',
+  12: 'Adventure',
+  16: 'Animation',
+  35: 'Comedy',
+  80: 'Crime',
+  99: 'Documentary',
+  18: 'Drama',
+  10751: 'Family',
+  14: 'Fantasy',
+  36: 'History',
+  27: 'Horror',
+  10402: 'Music',
+  9648: 'Mystery',
+  10749: 'Romance',
+  878: 'Science Fiction',
+  10770: 'TV Movie',
+  53: 'Thriller',
+  10752: 'War',
+  37: 'Western'
+};
+
+
 async function fetchPopularMovies() {
   const response = await fetch(`${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&language=en-US&page=1`);
   if (!response.ok) throw new Error(`TMDb API error: ${response.statusText}`);
@@ -15,7 +39,7 @@ async function fetchPopularMovies() {
     id: movie.id,
     title: movie.title,
     posterUrl: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
-    genres: Array.isArray(movie.genre_ids) ? movie.genre_ids.map(id => ({ genre: id })) : [],
+    genres: Array.isArray(movie.genre_ids) ? movie.genre_ids.map(id => genreMap[id]).filter(Boolean) : [],
     rating: movie.vote_average ?? null,
   }));
 }
@@ -81,7 +105,6 @@ export async function getMergedMovieDetails(req, res) {
   }
 }
 
-//to delete
 export async function getPopularMovies(req, res) {
     try {
         const response = await fetch(`${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&language=en-US&page=1`);
@@ -103,9 +126,9 @@ export async function getPopularMovies(req, res) {
             ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` 
             : null,
         genres: Array.isArray(movie.genre_ids) 
-            ? movie.genre_ids.map(id => ({ genre: id })) 
+            ? movie.genre_ids.map(id => genreMap[id]).filter(Boolean) 
             : [],
-        rating: movie.vote_average ?? null,
+        rating: movie.vote_average?.toFixed(1) ?? null,
         }))
 
         res.json({ movies: films });
@@ -116,7 +139,7 @@ export async function getPopularMovies(req, res) {
     }
 }
 
-export async function getMoviesView(req, res) {
+/*export async function getMoviesView(req, res) {
     try {
         const popularMovies = await fetchPopularMovies();
 
@@ -125,7 +148,7 @@ export async function getMoviesView(req, res) {
         console.error(error);
         res.render('home-page', { movies: [] });
     }
-}
+} */
 
 export async function searchMovies(req, res) {
   try {
@@ -155,9 +178,9 @@ export async function searchMovies(req, res) {
           ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` 
           : null,
         genres: Array.isArray(movie.genre_ids) 
-          ? movie.genre_ids.map(id => ({ genre: id })) 
+          ? movie.genre_ids.map(id => genreMap[id]).filter(Boolean)
           : [],
-        rating: movie.vote_average ?? null,
+        rating: movie.vote_average?.toFixed(1) ?? null,
       }))
     });
   } catch (error) {

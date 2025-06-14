@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import db from "./database.js";
 import path from 'path';
-import { fileURLToPath } from 'url';
+//import { fileURLToPath } from 'url';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 
@@ -18,12 +18,13 @@ const PORT = process.env.PORT || 5000;
 
 const swaggerDocument = YAML.load('./MovieApp/swagger.yaml');
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+//const __filename = fileURLToPath(import.meta.url);
+//const __dirname = path.dirname(__filename);
 
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+//app.set('views', path.join(__dirname, 'views'));
+//app.set('view engine', 'ejs');
 app.use(express.json());
+app.use(express.static(path.join(process.cwd(), 'public')));
 app.use(express.urlencoded({ extended: true }))
 app.use(cors());
 app.use(cookieParser());
@@ -40,8 +41,12 @@ mongoConnect(async () => {
   app.use('/api/movies', movieRoutes);
   app.use('/api/lists', listRoutes);
 
+  //app.get('*', (req, res) => {
+  //  res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
+  //});
+
   app.listen(PORT, () => {
-    console.log('Server is running');
+    console.log(`Server running on port ${PORT}`);
   });
 
   

@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
 //import movieRoutes from './routes/movieRoutes.js';
 //import listRoutes from './routes/listRoutes.js';
 import db from "./database.js";
@@ -23,18 +24,25 @@ app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(cors());
+app.use(cookieParser());
 
 mongoConnect(async () => {
-  const { ensureDefaultLists } = await import('./controllers/listController.js');
-  await ensureDefaultLists();
 
   const movieRoutes = (await import('./routes/movieRoutes.js')).default;
   const listRoutes = (await import('./routes/listRoutes.js')).default;
   const authRoutes = (await import('./routes/authRoutes.js')).default;
 
+  app.get('/test', (req, res) => {
+    res.json({ message: 'Hello World' });
+  });
+
   app.use('/api/auth', authRoutes);
   app.use('/api/movies', movieRoutes);
   app.use('/api/lists', listRoutes);
 
-  app.listen(PORT);
+  app.listen(PORT, () => {
+    console.log('Server is running');
+  });
+
+  
 });

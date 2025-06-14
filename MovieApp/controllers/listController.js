@@ -1,37 +1,39 @@
 import List from "../models/List.js";
 
-export async function ensureDefaultLists() {
+export async function ensureDefaultLists(userId) {
   const defaultNames = ['Favourites', 'Watched', 'Watchlist'];
 
   for (const name of defaultNames) {
-    const exists = await List.findByName(name);
+    const exists = await List.findByName(name, userId);
     if (!exists) {
-      await List.add(new List(name));
+      console.log(`Creating default list "${name}" for user ${userId}`);
+      await List.add(new List(name, userId));
     }
   }
+  console.log('Finished ensuring default lists');
 } 
 
-//ensureDefaultLists();
+
+export async function getJSONlists(req, res) {
+  const userId = req.user.userId;
+  const savedLists = await List.getAll(userId);
+  res.json(savedLists);
+}
 
 
 export async function getListsView(req, res) {
-
-  const savedLists = await List.getAll();
-
-  const favouritesList = await List.findByName("Favourites");
-  const watchedList = await List.findByName("Watched");
-  const watchList = await List.findByName("Watchlist");
-
+  
+  const userId = req.user.userId;
+  await ensureDefaultLists(userId);
+  const savedLists = await List.getAll(userId);
 
     res.render("listsPage.ejs", {
-      favouritesList,
-      watchedList,
-      watchList,
       savedLists,
     });
 }
 
 export async function createNewList(req, res) {
+  const userId = req.user.userId;
   const rawName = req.body.name;
   const name = rawName?.trim();
 
@@ -39,29 +41,32 @@ export async function createNewList(req, res) {
     return res.status(400).send('List name is required');
   }
   
-  const existing = await List.findByName(name);
+  const existing = await List.findByName(name, userId);
   if (existing) {
     return res.status(409).render("409.ejs");
   }
 
-  const newList = new List(name);
+  const newList = new List(name, userId);
   await List.add(newList);
 
-  res.status(302).redirect("/api/lists");
+  res.status(302).redirect("/api/lists/view");
 
 }
 
 
 export async function getListView(request, response) {
+  const userId = request.user.userId;
   const name = request.params.name;
-  const list = await List.findByName(name);
-  const savedLists = await List.getAll();
+  const list = await List.findByName(name, userId);
+  if (!list) return response.status(404).render("404.ejs");
 
-  const savedMovies = await List.getMovies(name) || [];
+  const savedLists = await List.getAll(userId);
 
-  const favouritesList = await List.findByName("Favourites");
-  const watchedList = await List.findByName("watched");
-  const watchList = await List.findByName("Watchlist");
+  const savedMovies = await List.getMovies(name, userId) || [];
+
+  const favouritesList = await List.findByName("Favourites", userId);
+  const watchedList = await List.findByName("watched", userId);
+  const watchList = await List.findByName("Watchlist", userId);
 
   response.render("list.ejs", {
     list,
@@ -75,22 +80,24 @@ export async function getListView(request, response) {
 
 
 export async function deleteList(req, res) {
+  const userId = req.user.userId;
   const name = req.params.name;
-  await List.deleteByName(name);
+  await List.deleteByName(name, userId);
 
-  res.status(200).redirect("/api/lists");
+  res.status(200).redirect("/api/lists/view");
 
 }
 
 
 export async function addMovieToUserList(req, res) {
+  const userId = req.user.userId;
   const { id, title, posterURL, genres, rating } = req.body;
   const { name: listName } = await req.params;
 
   if (!listName?.trim() || !id?.trim() || !title?.trim())
     return res.status(404).render("404.ejs");
 
-  const list = await List.findByName(listName);
+  const list = await List.findByName(listName, userId);
   
   if (!list) {
     return res.status(404).render("404.ejs");
@@ -101,7 +108,7 @@ export async function addMovieToUserList(req, res) {
         return res.status(409).render('409.ejs');
     }
 
-    await List.addMovieToList(listName, { id, title, posterURL, genres, rating });
+    await List.addMovieToList(listName, userId, { id, title, posterURL, genres, rating });
 
     res.status(200).redirect(`/api/lists/${encodeURIComponent(listName)}`);
 
@@ -110,9 +117,10 @@ export async function addMovieToUserList(req, res) {
 
 
 export async function getMoviesFromUserList(req, res) {
+  const userId = req.user.userId;
   const { name: listName } = await req.params;
 
-  const list = await List.List.findByName(listName);
+  const list = await List.findByName(listName, userId);
 
   if (!list) {
     return res.status(404).render("404.ejs");
@@ -125,9 +133,10 @@ export async function getMoviesFromUserList(req, res) {
 
 
 export async function deleteMovieFromUserList(req, res) {
+    const userId = req.user.userId;
     const { name: listName, id: movieId } = req.params;
 
-    const list = await List.List.findByName(listName);
+    const list = await List.findByName(listName, userId);
 
     if (!list) {
         return res.status(404).render("404.ejs");
@@ -138,7 +147,7 @@ export async function deleteMovieFromUserList(req, res) {
         return res.status(404).render('404.ejs');
     }
 
-    await List.deleteMovieFromList(listName, movieId);
+    await List.deleteMovieFromList(listName, userId, movieId);
 
     res.status(200).redirect(`/api/lists/${encodeURIComponent(listName)}`);
 

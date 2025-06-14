@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Popular Movies</title>
-  <link rel="stylesheet" href="/public/main.css">
+  <link rel="stylesheet" href="/main.css">
 </head>
 <body>
   <h1>Popular Movies</h1>
@@ -21,7 +21,7 @@
 
     async function fetchMovies() {
       try {
-        const res = await fetch('/api/movies/popular');
+        const res = await fetch('/api/movies');
         const data = await res.json();
         container.innerHTML = '';
 
@@ -46,7 +46,50 @@
       }
     }
 
-    fetchMovies(); // on page load
+    fetchMovies();
+
+    function handleLogout() {
+      fetch('/api/auth/logout', { method: 'POST' })
+        .then(() => {
+          window.location.href = '/api/auth/login';
+        })
+        .catch(err => {
+          console.error('Logout failed:', err);
+        });
+    }
+
+
+    document.getElementById('searchForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const query = document.getElementById('searchInput').value.trim();
+      if (!query) return;
+
+      try {
+        const res = await fetch(`/api/movies/search?query=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        container.innerHTML = '';
+
+        if (data.movies?.length) {
+          data.movies.forEach(movie => {
+            const el = document.createElement('div');
+            el.classList.add('movie');
+            el.innerHTML = `
+              <img src="${movie.posterUrl}" alt="${movie.title}" />
+              <h2>${movie.title}</h2>
+              <p>Genres: ${movie.genres.join(', ')}</p>
+              <p>Rating: ${movie.rating}</p>
+            `;
+            container.appendChild(el);
+          });
+        } else {
+          container.innerHTML = '<p>No movies found.</p>';
+        }
+      } catch (err) {
+        console.error('Search failed:', err);
+        container.innerHTML = '<p>Error during search.</p>';
+      }
+    });
+
   </script>
 </body>
 </html>

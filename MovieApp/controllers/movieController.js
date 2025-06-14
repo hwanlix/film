@@ -28,23 +28,6 @@ const genreMap = {
 };
 
 
-async function fetchPopularMovies() {
-  const response = await fetch(`${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&language=en-US&page=1`);
-  if (!response.ok) throw new Error(`TMDb API error: ${response.statusText}`);
-  
-  const data = await response.json();
-  if (!data.results) throw new Error('TMDb response missing results');
-
-  return data.results.map(movie => ({
-    id: movie.id,
-    title: movie.title,
-    posterUrl: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
-    genres: Array.isArray(movie.genre_ids) ? movie.genre_ids.map(id => genreMap[id]).filter(Boolean) : [],
-    rating: movie.vote_average ?? null,
-  }));
-}
-
-
 async function fetchMovieDetailsFromTMDb(tmdbId) {
   const response = await fetch(`${TMDB_BASE_URL}/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=en-US`);
   if (!response.ok) throw new Error(`TMDb API error: ${response.statusText}`);
@@ -139,17 +122,6 @@ export async function getPopularMovies(req, res) {
     }
 }
 
-/*export async function getMoviesView(req, res) {
-    try {
-        const popularMovies = await fetchPopularMovies();
-
-        res.render('home-page', { movies: popularMovies });
-    } catch (error) {
-        console.error(error);
-        res.render('home-page', { movies: [] });
-    }
-} */
-
 export async function searchMovies(req, res) {
   try {
     const { query } = req.query;
@@ -171,12 +143,12 @@ export async function searchMovies(req, res) {
     }
 
     res.json({
-      films: data.results.map(movie => ({
+      movies: data.results.map(movie => ({
         id: movie.id,
         title: movie.title,
-        posterUrlPreview: movie.poster_path 
-          ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` 
-          : null,
+        posterUrl: movie.poster_path 
+            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` 
+            : null,
         genres: Array.isArray(movie.genre_ids) 
           ? movie.genre_ids.map(id => genreMap[id]).filter(Boolean)
           : [],

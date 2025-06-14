@@ -6,18 +6,9 @@ export async function ensureDefaultLists(userId) {
   for (const name of defaultNames) {
     const exists = await List.findByName(name, userId);
     if (!exists) {
-      console.log(`Creating default list "${name}" for user ${userId}`);
       await List.add(new List(name, userId));
     }
   }
-  console.log('Finished ensuring default lists');
-} 
-
-
-export async function getJSONlists(req, res) {
-  const userId = req.user.userId;
-  const savedLists = await List.getAll(userId);
-  res.json(savedLists);
 }
 
 
@@ -49,7 +40,7 @@ export async function createNewList(req, res) {
   const newList = new List(name, userId);
   await List.add(newList);
 
-  res.status(302).redirect("/api/lists/view");
+  res.status(302).redirect("/api/lists");
 
 }
 
@@ -59,20 +50,13 @@ export async function getListView(request, response) {
   const name = request.params.name;
   const list = await List.findByName(name, userId);
   if (!list) return response.status(404).render("404.ejs");
-
+  await ensureDefaultLists(userId);
   const savedLists = await List.getAll(userId);
 
   const savedMovies = await List.getMovies(name, userId) || [];
 
-  const favouritesList = await List.findByName("Favourites", userId);
-  const watchedList = await List.findByName("watched", userId);
-  const watchList = await List.findByName("Watchlist", userId);
-
   response.render("list.ejs", {
     list,
-    favouritesList,
-    watchedList,
-    watchList,
     savedLists,
     savedMovies,
   });
@@ -84,7 +68,7 @@ export async function deleteList(req, res) {
   const name = req.params.name;
   await List.deleteByName(name, userId);
 
-  res.status(200).redirect("/api/lists/view");
+  res.status(200).redirect("/api/lists");
 
 }
 

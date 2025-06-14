@@ -149,7 +149,7 @@ paths:
         200:
           description: Movie removed
 
-  /api/movies/popular:
+  /api/movies:
     get:
       summary: Get popular movies from TMDb
       responses:

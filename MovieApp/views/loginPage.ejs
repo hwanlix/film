@@ -23,14 +23,14 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
-      credentials: 'include'  // IMPORTANT: allow cookies to be sent/received
+      credentials: 'include'  
     });
 
     const data = await response.json();
 
     if (response.ok) {
       alert('Logged in!');
-      window.location.href = '/api/lists/view';  // redirect to your lists page, cookie will be sent automatically
+      window.location.href = '/api/lists/view'; 
     } else {
       alert(data.message || 'Login failed');
     }

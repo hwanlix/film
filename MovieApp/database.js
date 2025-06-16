@@ -4,7 +4,7 @@ const MongoClient = _MongoClient;
 let database;
 
 const mongoConnect = (callback) => {
-  MongoClient.connect(`mongodb+srv://alesiasichova:JLDxl4tvHpSpvjFY@labtestdb.wn5ltez.mongodb.net/?retryWrites=true&w=majority&appName=labTestDB`)
+  MongoClient.connect(`mongodb+srv`)
     .then((client) => {
       console.log("Connected!");
       database = client.db("movies_api");

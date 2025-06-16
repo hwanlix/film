@@ -28,7 +28,8 @@ const genreMap = {
 };
 
 
-async function fetchMovieDetailsFromTMDb(tmdbId) {
+export async function fetchMovieDetailsFromTMDb(tmdbId, fetchFn) {
+  const fetch = fetchFn || (await import('node-fetch')).default;
   const response = await fetch(`${TMDB_BASE_URL}/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=en-US`);
   if (!response.ok) throw new Error(`TMDb API error: ${response.statusText}`);
   const data = await response.json();
@@ -36,7 +37,8 @@ async function fetchMovieDetailsFromTMDb(tmdbId) {
 }
 
 
-async function fetchMovieDetailsFromOMDb(imdbId) {
+export async function fetchMovieDetailsFromOMDb(imdbId, fetchFn) {
+  const fetch = fetchFn || (await import('node-fetch')).default;
   const response = await fetch(`http://www.omdbapi.com/?i=${imdbId}&apikey=${OMDB_API_KEY}`);
   if (!response.ok) throw new Error(`OMDb API error: ${response.statusText}`);
   const data = await response.json();

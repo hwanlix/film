@@ -86,7 +86,7 @@ export async function addMovieToUserList(req, res) {
     const { id, title, posterURL, genres, rating } = req.body;
     const { name: listName } = req.params;
 
-    if (!listName?.trim() || !id?.trim() || !title?.trim())
+    if (!listName?.trim() || !`${id}`.trim() || !title?.trim())
       return res.status(400).json({ error: 'Missing required fields' });
 
     const list = await List.findByName(listName, userId);
@@ -131,7 +131,8 @@ export async function getMoviesFromUserList(req, res) {
 export async function deleteMovieFromUserList(req, res) {
     try {
     const userId = req.user.userId;
-    const { name: listName, id: movieId } = req.params;
+    const { name: listName } = req.params;
+    const movieId = Number(req.params.id);
 
     const list = await List.findByName(listName, userId);
     if (!list) return res.status(404).json({ error: 'List not found' });

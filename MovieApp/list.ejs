@@ -59,7 +59,7 @@
                 <% }) %>
                 <button class="create_list_btn_dp_dwn">+ Create New List</button>
 
-                <!-- Inline create list form for dropdown -->
+
                 <form id="createListFormDropdown" class="inline-create-form" action="/api/lists/add" method="POST">
                   <input type="text" name="name" placeholder="List name" required />
                   <button type="submit" class="button">Create</button>
@@ -81,7 +81,7 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Sidebar create new list button + inline form
+      
       const createBtnSidebar = document.querySelector('.create_list_btn_sb');
       const formSidebar = document.getElementById('createListFormSidebar');
       const cancelBtnSidebar = formSidebar.querySelector('.cancel-btn');
@@ -119,7 +119,7 @@
           const data = await res.json();
 
           if (res.ok) {
-            // Reload page to show new list in sidebar and current list if applicable
+            
             window.location.reload();
           } else {
             errorSidebar.textContent = data.error || 'Failed to create list';
@@ -131,7 +131,7 @@
         }
       });
 
-      // Dropdown create new list button + inline form
+
       const createBtnDropdown = document.querySelector('.create_list_btn_dp_dwn');
       const formDropdown = document.getElementById('createListFormDropdown');
       const cancelBtnDropdown = formDropdown.querySelector('.cancel-btn');

@@ -7,6 +7,7 @@
 </head>
 <body>
   <main>
+    <button onclick="goHome()">🏠 Home</button>
     <h1 class="heading">Your lists</h1>
 
     <button class="create_list_btn" id="openFormBtn">+ Create New List</button>
@@ -22,6 +23,9 @@
   </main>
 
   <script>
+    function goHome() {
+      window.location.href = '/';
+    }
     const openFormBtn = document.getElementById('openFormBtn');
     const createListForm = document.getElementById('createListForm');
     const cancelBtn = document.getElementById('cancelBtn');

@@ -1,13 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Popular Movies</title>
+  <title>Seans.pl</title>
   <link rel="stylesheet" href="/main.css">
 </head>
 <body>
-  <h1>Popular Movies</h1>
+  <h1>Seans.pl</h1>
+  <h2>Popular movies</h2>
 
-  <button onclick="handleLogout()">Logout</button>
+  <div id="authButtons" style="display: flex; gap: 10px;">
+    <button onclick="window.location.href='/login.html'">Login</button>
+    <button onclick="window.location.href='/register.html'">Register</button>
+  </div>
+  <div id="userButtons" style="display: none; gap: 10px;">
+    <button onclick="window.location.href='/lists.html'">Your Lists</button>
+    <button onclick="handleLogout()">Logout</button>
+  </div>
 
   <form id="searchForm">
     <input type="text" id="searchInput" placeholder="Search movies..." />
@@ -19,22 +27,77 @@
   <script>
     const container = document.getElementById('moviesContainer');
 
+    if (document.cookie.includes('userVisible=1')) {
+      document.getElementById('authButtons').style.display = 'none';
+      document.getElementById('userButtons').style.display = 'flex';
+    } else {
+      document.getElementById('authButtons').style.display = 'flex';
+      document.getElementById('userButtons').style.display = 'none';
+    }
+
+
+    function showMovieDetails(movieId) {
+      window.location.href = `/movie-details.html?tmdbId=${movieId}`;
+    }
+
+    async function fetchUserLists() {
+      try {
+        const res = await fetch('/api/lists', { credentials: 'include' });
+        if (!res.ok) throw new Error('Failed to fetch lists');
+        const data = await res.json();
+        return data.savedLists || []; 
+      } catch (err) {
+        console.error('Error fetching lists:', err);
+        return [];
+      }
+    }
+
     async function fetchMovies() {
       try {
         const res = await fetch('/api/movies');
         const data = await res.json();
+        const lists = await fetchUserLists();
+
         container.innerHTML = '';
 
         if (data.movies?.length) {
           data.movies.forEach(movie => {
             const el = document.createElement('div');
             el.classList.add('movie');
+
+            const genreText = movie.genres?.join(', ') || 'N/A';
+
             el.innerHTML = `
               <img src="${movie.posterUrl}" alt="${movie.title}" />
               <h2>${movie.title}</h2>
-              <p>Genres: ${movie.genres.join(', ')}</p>
-              <p>Rating: ${movie.rating}</p>
+              <p>Genres: ${genreText}</p>
+              <p>Rating: ${movie.rating || 'N/A'}</p>
+              <label for="listSelect-${movie.id}">Add to list:</label>
+              <select id="listSelect-${movie.id}" data-movie-id="${movie.id}">
+                ${lists.map(list => `<option value="${list.name}">${list.name}</option>`).join('')}
+              </select>
             `;
+            
+            const addButton = document.createElement('button');
+            addButton.textContent = 'Add';
+            addButton.addEventListener('click', () => {
+              addToList(
+                movie.id,
+                movie.title,
+                movie.posterUrl,
+                movie.genres,
+                movie.rating || null
+              );
+            });
+
+            const detailsButton = document.createElement('button');
+            detailsButton.textContent = 'Details';
+            detailsButton.addEventListener('click', () => {
+              showMovieDetails(movie.id);
+            });
+
+            el.appendChild(addButton);
+            el.appendChild(detailsButton);
             container.appendChild(el);
           });
         } else {
@@ -46,39 +109,76 @@
       }
     }
 
-    fetchMovies();
+    async function addToList(id, title, posterURL, genres, rating) {
+      const select = document.getElementById(`listSelect-${id}`);
+      const listName = select.value;
 
-    function handleLogout() {
-      fetch('/api/auth/logout', { method: 'POST' })
-        .then(() => {
-          window.location.href = '/api/auth/login';
-        })
-        .catch(err => {
-          console.error('Logout failed:', err);
+      if (!listName) {
+        alert('Please select a list.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/lists/${encodeURIComponent(listName)}/add-movie`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ id, title, posterURL, genres, rating })
         });
+
+        const data = await res.json();
+        if (res.ok) {
+          alert(`Movie added to "${listName}"`);
+        } else {
+          alert(data.error || 'Failed to add movie');
+        }
+      } catch (err) {
+        console.error('Error adding movie:', err);
+        alert('Server error');
+      }
     }
 
-
-    document.getElementById('searchForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const query = document.getElementById('searchInput').value.trim();
-      if (!query) return;
-
+    async function handleSearch(query) {
       try {
         const res = await fetch(`/api/movies/search?query=${encodeURIComponent(query)}`);
         const data = await res.json();
+        const lists = await fetchUserLists();
         container.innerHTML = '';
 
         if (data.movies?.length) {
           data.movies.forEach(movie => {
             const el = document.createElement('div');
             el.classList.add('movie');
+            const genreText = movie.genres?.join(', ') || 'N/A';
+
             el.innerHTML = `
               <img src="${movie.posterUrl}" alt="${movie.title}" />
               <h2>${movie.title}</h2>
-              <p>Genres: ${movie.genres.join(', ')}</p>
-              <p>Rating: ${movie.rating}</p>
+              <p>Genres: ${genreText}</p>
+              <p>Rating: ${movie.rating || 'N/A'}</p>
+              <label for="listSelect-${movie.id}">Add to list:</label>
+              <select id="listSelect-${movie.id}" data-movie-id="${movie.id}"></select>
+              
+              <button onclick="showMovieDetails('${movie.id}')">Details</button>
             `;
+
+            const select = el.querySelector(`#listSelect-${movie.id}`);
+            lists.forEach(list => {
+              const option = document.createElement('option');
+              option.value = list.name;
+              option.textContent = list.name;
+              select.appendChild(option);
+            });
+
+            // Create Add button:
+            const addButton = document.createElement('button');
+            addButton.textContent = 'Add';
+            addButton.addEventListener('click', () => {
+              addToList(movie.id, movie.title, movie.posterUrl, movie.genres, movie.rating || null);
+            });
+
+            el.appendChild(addButton);
+
             container.appendChild(el);
           });
         } else {
@@ -88,8 +188,21 @@
         console.error('Search failed:', err);
         container.innerHTML = '<p>Error during search.</p>';
       }
+    }
+
+    function handleLogout() {
+      fetch('/api/auth/logout', { method: 'POST' })
+        .then(() => window.location.href = '/')
+        .catch(err => console.error('Logout failed:', err));
+    }
+
+    document.getElementById('searchForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const query = document.getElementById('searchInput').value.trim();
+      if (query) await handleSearch(query);
     });
 
+    fetchMovies();
   </script>
 </body>
 </html>

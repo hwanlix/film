@@ -2,11 +2,11 @@
   "name": "movieapp",
   "version": "1.0.0",
   "main": "server.js",
-  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "start": "node server.js"
   },
+  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -24,7 +24,9 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
-    "@types/node": "^22.15.29"
+    "@types/node": "^22.15.29",
+    "jest": "^30.0.0",
+    "supertest": "^7.1.1"
   },
   "description": ""
 }

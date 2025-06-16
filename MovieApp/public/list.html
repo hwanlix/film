@@ -57,13 +57,11 @@
             li.style.marginBottom = '12px';
             li.style.gap = '12px';
 
-            // Poster
             const poster = document.createElement('img');
             poster.src = movie.posterURL;
             poster.alt = `${movie.title} poster`;
             poster.style.width = '100px';
 
-            // Info
             const content = document.createElement('div');
             content.innerHTML = `
               <strong>${movie.title}</strong><br>
@@ -71,7 +69,6 @@
               Genres: ${Array.isArray(movie.genres) ? movie.genres.join(', ') : 'N/A'}
             `;
 
-            //Details Button
             const detailsBtn = document.createElement('button');
             detailsBtn.textContent = 'Details';
             detailsBtn.className = 'button';
@@ -83,7 +80,7 @@
               }
               showMovieDetails(movie.id);
             });
-            // Delete Button
+
             const form = document.createElement('form');
             form.action = `/api/lists/${encodeURIComponent(listName)}/delete-movie/${movie.id}?_method=DELETE`;
             form.method = 'POST';
@@ -118,15 +115,15 @@
             deleteBtn.textContent = 'Delete';
 
             form.appendChild(deleteBtn);
-            // Button Container
+ 
             const btns = document.createElement('div');
             btns.style.display = 'flex';
             btns.style.flexDirection = 'column';
             btns.style.gap = '5px';
-            btns.appendChild(form);     // the delete form
+            btns.appendChild(form);     
             btns.appendChild(detailsBtn);
 
-            // Assemble li
+
             li.appendChild(poster);
             li.appendChild(content);
             li.appendChild(btns);

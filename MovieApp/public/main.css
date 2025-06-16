@@ -1,24 +1,462 @@
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9fafb;
+  color: #333;
+  line-height: 1.5;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 2.2rem;
+  margin-bottom: 25px;
+  text-align: center;
+  color: #222;
+}
+
+h2 {
+  font-size: 1.8rem;
+  margin-bottom: 25px;
+  text-align: center;
+  color: #222;
+}
+
+.flex-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+button, .button {
+  cursor: pointer;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  padding: 10px 16px;
+  margin: 1rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  transition: background-color 0.25s ease;
+  user-select: none;
+}
+
+button:hover, .button:hover,
+button:focus, .button:focus {
+  background-color: #0056b3;
+  outline: none;
+}
+
+button:disabled, .button:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+#authButtons, #userButtons {
+  justify-content: center;
+}
+
+#searchForm {
+  max-width: 600px;
+  margin: 0 auto 30px;
+  display: flex;
+  gap: 8px;
+}
+
+#searchInput {
+  flex-grow: 1;
+  padding: 10px 14px;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  transition: border-color 0.3s ease;
+}
+
+#searchInput:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+#moviesContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.movie {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: box-shadow 0.2s ease;
+}
+
+.movie:hover {
+  box-shadow: 0 6px 14px rgb(0 0 0 / 0.15);
+}
+
+.movie img {
+  width: 140px;
+  height: auto;
+  border-radius: 5px;
+  margin-bottom: 12px;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+}
+
+.movie h2 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  color: #222;
+}
+
+.movie p {
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+  color: #555;
+}
+
+.movie label {
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  font-weight: 600;
+  color: #333;
+}
+
+.movie select {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 0.9rem;
+  border-radius: 5px;
+  border: 1.5px solid #ccc;
+  margin-bottom: 12px;
+  transition: border-color 0.3s ease;
+}
+
+.movie select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.movie > button {
+  width: 100%;
+  margin-top: 6px;
+}
+
+button[onclick="goHome()"] {
+  margin-bottom: 20px;
+  background-color: #28a745;
+}
+
+button[onclick="goHome()"]:hover {
+  background-color: #1e7e34;
+}
+
+#deleteListBtn {
+  background-color: #dc3545;
+  display: block;
+  margin: 0 auto 20px;
+}
+
+#deleteListBtn:hover {
+  background-color: #a71d2a;
+}
+
+#movieList {
+  list-style: none;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+#movieList li {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+  margin-bottom: 15px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+#movieList li img {
+  width: 100px;
+  border-radius: 5px;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+}
+
+#movieList li div {
+  flex-grow: 1;
+  font-size: 1rem;
+  color: #333;
+}
+
+#movieList li > div + div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 90px;
+}
+
+.button {
+  background-color: #007bff;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  border-radius: 5px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover,
+.button:focus {
+  background-color: #0056b3;
+  outline: none;
+}
+
+#listsContainer {
+  max-width: 650px;
+  margin: 0 auto 40px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+}
+
+.list_name {
+  background-color: #e0e7ff;
+  padding: 12px 20px;
+  border-radius: 10px;
+  color: #334155;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  user-select: none;
+}
+
+.list_name:hover, .list_name:focus {
+  background-color: #c7d2fe;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 0.15);
+  outline: none;
+}
+
 #createListForm {
-    display: none;
-    margin-top: 1rem;
+  max-width: 650px;
+  margin: 0 auto 50px;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.inline-create-form {
-    margin-top: 1rem;
-    display: none;
+#createListForm input[type="text"] {
+  flex-grow: 1;
+  padding: 10px 14px;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
 }
 
-.inline-create-form input[type="text"] {
-    padding: 0.3rem;
-    width: 150px;
+#createListForm input[type="text"]:focus {
+  border-color: #007bff;
+  outline: none;
 }
 
-.inline-create-form button {
-    margin-left: 0.5rem;
+#createListForm button {
+  min-width: 130px;
 }
 
-.form-error {
-    color: red;
-    margin-top: 0.5rem;
-    display: none;
+#errorMessage {
+  max-width: 650px;
+  margin: 0 auto 20px;
+  color: #b91c1c;
+  background-color: #fee2e2;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 2px 6px rgb(185 28 28 / 0.25);
+}
+
+#loginForm {
+  max-width: 380px;
+  margin: 0 auto 40px;
+  padding: 30px 25px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+#loginForm input[type="text"],
+#loginForm input[type="password"] {
+  padding: 10px 14px;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+}
+
+#loginForm input[type="text"]:focus,
+#loginForm input[type="password"]:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+#registerForm {
+  max-width: 380px;
+  margin: 0 auto;
+  padding: 30px 25px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+#registerForm input[type="text"],
+#registerForm input[type="password"] {
+  padding: 10px 14px;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+}
+
+#registerForm input[type="text"]:focus,
+#registerForm input[type="password"]:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+#registerForm button {
+  background-color: #007bff;
+  color: white;
+  font-weight: 600;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+  user-select: none;
+}
+
+#registerForm button:hover,
+#registerForm button:focus {
+  background-color: #0056b3;
+  outline: none;
+}
+
+#message {
+  max-width: 400px;
+  margin: 0 auto 20px auto;
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+  min-height: 1.3em; 
+}
+
+#poster {
+  border-radius: 8px;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.12);
+  margin-right: 1.5rem;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+#details {
+  flex: 1;
+  margin: 1rem;
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.5;
+}
+
+#details p {
+  margin-bottom: 0.75rem;
+}
+
+#details .label {
+  font-weight: 600;
+  color: #222;
+}
+
+#details ul.ratings {
+  list-style: disc inside;
+  padding-left: 1.2rem;
+  margin: 0.5rem 0 1rem 0;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+#actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+#actions label {
+  font-weight: 600;
+  color: #222;
+}
+
+#listSelect {
+  padding: 6px 10px;
+  border: 1.5px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+#listSelect:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+#addButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 9px 16px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.25s ease;
+  user-select: none;
+}
+
+#addButton:hover,
+#addButton:focus {
+  background-color: #0056b3;
+  outline: none;
 }

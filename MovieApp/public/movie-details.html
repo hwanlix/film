@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Movie Details</title>
+  <link rel="stylesheet" href="/main.css" />
+</head>
+<body>
+    <button onclick="goHome()">🏠 Home</button>
+  <h1 id="title">Loading movie...</h1>
+  <div id="movie-container" style="display:none;">
+    <img id="poster" src="" alt="Movie Poster" />
+    <div id="details">
+      <p id="genres"></p>
+      <p><span class="label">Rating:</span> <span id="rating"></span></p>
+      <p><span class="label">Release Date:</span> <span id="releaseDate"></span></p>
+      <p><span class="label">Runtime:</span> <span id="runtime"></span></p>
+      <p><span class="label">Director:</span> <span id="director"></span></p>
+      <p><span class="label">Actors:</span> <span id="actors"></span></p>
+      <p><span class="label">Language:</span> <span id="language"></span></p>
+      <p><span class="label">Country:</span> <span id="country"></span></p>
+      <p><span class="label">Box Office:</span> <span id="boxOffice"></span></p>
+      <p><span class="label">Awards:</span> <span id="awards"></span></p>
+      <p><span class="label">Overview:</span> <span id="overview"></span></p>
+      <p><span class="label">Plot:</span> <span id="plot"></span></p>
+      <div>
+        <span class="label">Ratings:</span>
+        <ul class="ratings" id="ratingsList"></ul>
+      </div>
+      <div id="actions">
+        <label for="listSelect">Add to list:</label>
+        <select id="listSelect"></select>
+        <button id="addButton">Add</button>
+      </div>
+      <p id="message"></p>
+    </div>
+  </div>
+  <p id="error" style="color:red;"></p>
+
+  <script>
+    function goHome() {
+        window.location.href = '/';
+    }
+
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+    
+
+    async function fetchUserLists() {
+      try {
+        const res = await fetch('/api/lists', { credentials: 'include' });
+        if (!res.ok) throw new Error('Failed to fetch lists');
+        const data = await res.json();
+        return data.savedLists || [];
+      } catch (err) {
+        console.error('Error fetching lists:', err);
+        return [];
+      }
+    }
+
+    async function loadMovie() {
+      const tmdbId = getQueryParam('tmdbId');
+      if (!tmdbId) {
+        document.getElementById('title').textContent = 'No movie ID specified.';
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/movies/${encodeURIComponent(tmdbId)}/details`, { credentials: 'include' });
+        if (!res.ok) throw new Error(`Failed to fetch movie details: ${res.statusText}`);
+
+        const movie = await res.json();
+
+        document.getElementById('title').textContent = movie.title || 'Unknown title';
+        const posterEl = document.getElementById('poster');
+        if (movie.posterUrl) {
+          posterEl.src = movie.posterUrl;
+          posterEl.alt = movie.title + ' poster';
+        } else {
+          posterEl.style.display = 'none';
+        }
+
+        const genres = movie.genres?.length ? movie.genres.map(g => g.name).join(', ') : 'N/A';
+        document.getElementById('genres').textContent = `Genres: ${genres}`;
+
+        document.getElementById('rating').textContent = movie.rating ?? 'N/A';
+        document.getElementById('releaseDate').textContent = movie.releaseDate ?? 'N/A';
+        document.getElementById('runtime').textContent = movie.runtime ?? 'N/A';
+        document.getElementById('director').textContent = movie.director ?? 'N/A';
+        document.getElementById('actors').textContent = movie.actors ?? 'N/A';
+        document.getElementById('language').textContent = movie.language ?? 'N/A';
+        document.getElementById('country').textContent = movie.country ?? 'N/A';
+        document.getElementById('boxOffice').textContent = movie.boxOffice ?? 'N/A';
+        document.getElementById('awards').textContent = movie.awards ?? 'N/A';
+        document.getElementById('overview').textContent = movie.overview ?? 'N/A';
+        document.getElementById('plot').textContent = movie.plot ?? 'N/A';
+
+        const ratingsList = document.getElementById('ratingsList');
+        ratingsList.innerHTML = '';
+        if (movie.ratings?.length) {
+          movie.ratings.forEach(r => {
+            const li = document.createElement('li');
+            li.textContent = `${r.Source}: ${r.Value}`;
+            ratingsList.appendChild(li);
+          });
+        } else {
+          ratingsList.innerHTML = '<li>N/A</li>';
+        }
+
+        document.getElementById('movie-container').style.display = 'flex';
+
+        setupAddButton(movie); 
+      } catch (error) {
+        document.getElementById('title').textContent = 'Error loading movie details.';
+        document.getElementById('error').textContent = error.message;
+        console.error(error);
+      }
+    }
+
+    async function setupAddButton(movie) {
+      const addBtn = document.getElementById('addButton');
+      const select = document.getElementById('listSelect');
+      const messageEl = document.getElementById('message');
+
+      const lists = await fetchUserLists();
+
+      if (!lists.length) {
+        select.innerHTML = '<option disabled selected>No lists available</option>';
+        addBtn.disabled = true;
+        return;
+      }
+
+      select.innerHTML = lists.map(list => `<option value="${list.name}">${list.name}</option>`).join('');
+      addBtn.disabled = false;
+
+      addBtn.onclick = async () => {
+        const selectedList = select.value;
+        if (!selectedList) {
+          alert('Please select a list.');
+          return;
+        }
+
+        addBtn.disabled = true;
+        messageEl.textContent = 'Adding to list...';
+
+        try {
+          const res = await fetch(`/api/lists/${encodeURIComponent(selectedList)}/add-movie`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              id: movie.tmdbId,
+              title: movie.title,
+              posterURL: movie.posterUrl,
+              genres: movie.genres?.map(g => g.name) || [],
+              rating: movie.rating ?? null
+            })
+          });
+
+          const data = await res.json();
+          if (res.ok) {
+            messageEl.style.color = 'green';
+            messageEl.textContent = `Movie added to "${selectedList}" successfully!`;
+          } else {
+            throw new Error(data.error || 'Unknown error');
+          }
+        } catch (err) {
+          messageEl.style.color = 'red';
+          messageEl.textContent = `Failed to add movie: ${err.message}`;
+        } finally {
+          addBtn.disabled = false;
+        }
+      };
+    }
+
+    loadMovie();
+  </script>
+</body>
+</html>

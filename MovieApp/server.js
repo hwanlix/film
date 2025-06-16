@@ -6,6 +6,7 @@ import db from "./database.js";
 import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
+import methodOverride from 'method-override';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use(express.static(path.join(process.cwd(), '/MovieApp/public')));
 app.use(express.urlencoded({ extended: true }))
 app.use(cors());
 app.use(cookieParser());
+app.use(methodOverride('_method'));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 

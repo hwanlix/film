@@ -111,14 +111,26 @@ class List {
       if (!ObjectId.isValid(userId)) {
         throw new Error('Invalid userId');
       }
-      await db.collection(COLLECTION_NAME).updateOne(
+
+      const parsedMovieId = isNaN(Number(movieId)) ? movieId : Number(movieId);
+
+      const result = await db.collection(COLLECTION_NAME).updateOne(
         { name: listName, userId: new ObjectId(String(userId)) },
-        { $pull: { movies: { id: movieId } } }
+        { $pull: { movies: { id: parsedMovieId } } }
       );
+
+      if (result.modifiedCount === 0) {
+        console.warn(`No movie with id ${movieId} was removed. It may not exist or ID type mismatch.`);
+      } else {
+        console.log(`Movie ${movieId} removed from list '${listName}'`);
+      }
+
     } catch (error) {
       console.error('Error while removing movie:', error);
+      throw error;
     }
   }
+
 
   static async getMovies(listName, userId) {
     const db = getDatabase();

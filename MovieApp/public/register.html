@@ -7,6 +7,7 @@
 </head>
 <body>
   <h1>Register</h1>
+  <button onclick="goToLogin()">Log In</button>
 
   <div id="message"></div>
 
@@ -17,6 +18,11 @@
   </form>
 
   <script>
+
+    
+    function goToLogin() {
+      window.location.href = '/login.html';
+    }
     const messageDiv = document.getElementById('message');
 
     document.getElementById('registerForm').addEventListener('submit', async (e) => {

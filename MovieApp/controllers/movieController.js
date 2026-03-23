@@ -1,7 +1,11 @@
 import fetch from 'node-fetch';
+import { config } from "dotenv";
 
-const OMDB_API_KEY = '9308f81f';
-const TMDB_API_KEY = '933abbf58300a7122fefbf46dc1ea4f4';
+config();
+
+
+const OMDB_API_KEY = process.env.OMDB_API_KEY;
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
 

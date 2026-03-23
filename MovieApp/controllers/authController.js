@@ -2,8 +2,12 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import { ensureDefaultLists } from '../controllers/listController.js';
+import { config } from "dotenv";
 
-const JWT_SECRET = process.env.JWT_SECRET || '5fe9034a9540e743188ac16ec2000b7a868fb8cb772701082ba39437676db4e5';
+config();
+
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export async function showLoginForm(req, res) {
   res.status(200).json({ message: 'Login form endpoint (for frontend use)' });

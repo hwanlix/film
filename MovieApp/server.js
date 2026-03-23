@@ -8,25 +8,23 @@ import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import methodOverride from 'method-override';
 
-dotenv.config();
+dotenv.config({ path: './.env' });
 
 const { mongoConnect } = db;
-
 const app = express();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT
 
-const swaggerDocument = YAML.load('./MovieApp/swagger.yaml');
+const swaggerDocument = YAML.load('./swagger.yaml');
 
 app.use(express.json());
-app.use(express.static(path.join(process.cwd(), '/MovieApp/public')));
+app.use(express.static(path.join(process.cwd(), 'public')));
 app.use(express.urlencoded({ extended: true }))
 app.use(cors());
 app.use(cookieParser());
 app.use(methodOverride('_method'));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
 mongoConnect(async () => {
 
   const movieRoutes = (await import('./routes/movieRoutes.js')).default;
